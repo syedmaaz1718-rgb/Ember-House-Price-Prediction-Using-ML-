@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title></title><meta name="description" content="Bengaluru house price predictor trained on 13,000+ real listings."><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body><script src="app.js"></script><main><div class="wrap">
+<div class="hero"><canvas id="dust"></canvas><div class="sun"></div>
+<div class="sky"><svg viewBox="0 0 1600 400" preserveAspectRatio="none" style="opacity:0.55"><path d="M0 400V260V197h70V260V221h53V260V159h101V260V137h51V260V222h42V260V194h110V260V176h47V260V212h106V260V164h75V260V187h53V260V126h67V260V189h73V260V162h64V260V194h79V260V142h87V260V219h83V260V183h104V260V183h62V260V191h100V260V196h51V260V194h40V260V250h79V260V225h64V260V400z" fill="#1c1114" stroke="#3a262b"/></svg><svg viewBox="0 0 1600 400" preserveAspectRatio="none" style="opacity:0.8"><path d="M0 400V300V246h104V300V225h86V300V190h107V300V209h79V300V274h83V300V180h55V300V229h55V300V236h85V300V252h118V300V259h110V300V188h93V300V178h75V300V286h102V300V251h75V300V205h106V300V215h73V300V265h105V300V251h91V300V400z" fill="#150d0f" stroke="#52393f"/></svg><svg viewBox="0 0 1600 400" preserveAspectRatio="none" style="opacity:1"><path d="M0 400V345V275h131V345V262h101V345V279h67V345V324h95V345V280h138V345V292h75V345V287h82V345V253h118V345V295h65V345V286h70V345V252h101V345V286h101V345V269h101V345V329h112V345V287h69V345V274h139V345V287h116V345V400z" fill="#0f0809" stroke="#4a3238"/></svg></div>
+<div class="eyebrow fade">Trained on real Bengaluru listings</div>
+<h1 class="serif" style="margin-top:18px"><span class="ln"><span>What is a</span></span><span class="ln"><span>home in</span></span><span class="ln"><span><em>Bengaluru</em> worth?</span></span></h1>
+<p class="fade">A gradient-boosted model learned from thousands of real listings. Pick a locality, size and bathrooms. It prices the home in your browser, instantly, with an honest range.</p>
+<div class="stats fade"><div><b id="s1">–</b><span>listings used</span></div><div><b id="s2">–</b><span>localities</span></div><div><b id="s3">–</b><span>median price</span></div></div><div class="scrollcue">Scroll</div></div>
+<div class="marq" id="mq"><div></div></div>
+<section id="lab"><div class="lab">
+<div class="card reveal"><label>Locality</label><div style="position:relative"><input type="text" id="loc" placeholder="Search e.g. Whitefield" autocomplete="off"><div class="sug" id="sug"></div></div>
+<label>BHK</label><div class="pills" id="bhk"></div>
+<label>Bathrooms</label><div class="pills" id="bath"></div>
+<label>Area</label><div class="sqv"><span id="sqv">1200</span><small>sq ft</small></div><input type="range" id="sq" min="300" max="5000" step="10" value="1200"></div>
+<div class="card out reveal"><div class="eyebrow" id="ol">Estimated price</div><div class="price" id="pr">–</div>
+<div class="range"><i id="ri"></i><u id="rm"></u></div><div class="rl"><span>Low <b id="lo"></b></span><span>High <b id="hi"></b></span></div>
+<div class="facts"><div><span>Per sq ft</span><b id="pp">–</b></div><div><span>Locality median</span><b id="lm">–</b></div><div><span>Listings in locality</span><b id="ln">–</b></div><div><span>vs locality</span><b id="vs">–</b></div></div>
+<p class="note">Range = where 80% of unseen test listings landed. See Method for accuracy.</p></div>
+</div></section>
+<section><div class="eyebrow">Where you sit</div><h2 class="serif reveal" style="margin:12px 0 0">Your home among <em style="font-style:italic;color:var(--hot)">real listings</em></h2><div class="card chart rel" id="sc"></div></section>
+</div></main>
+<script>
+load.then(()=>{reveal();$('#mq div').innerHTML=(t=>t+t)(STATS.localities_list.slice(0,40).map(l=>`<span><b>${l.name}</b><i>₹${l.median_ppsf.toLocaleString()}/SQFT</i></span>`).join(''));const S=STATS;count($('#s1'),S.rows_clean,v=>Math.round(v).toLocaleString());count($('#s2'),S.localities,v=>Math.round(v));count($('#s3'),S.median_price,v=>'₹'+Math.round(v)+' L');
+let st={loc:'Whitefield',bhk:2,bath:2,sqft:1200};const L=Object.fromEntries(S.localities_list.map(l=>[l.name,l]));if(!L[st.loc])st.loc=S.localities_list[0].name;
+$('#loc').value=st.loc;
+const pills=(id,arr,key)=>{$(id).innerHTML=arr.map(v=>`<button data-v="${v}">${v}${v==arr[arr.length-1]?'+':''}</button>`).join('');$$(id+' button').forEach(b=>b.onclick=()=>{st[key]=+b.dataset.v;upd()})};
+pills('#bhk',[1,2,3,4,5,6],'bhk');pills('#bath',[1,2,3,4,5,6],'bath');
+$('#sq').oninput=e=>{st.sqft=+e.target.value;upd()};
+const inp=$('#loc'),sug=$('#sug');let names=S.localities_list;
+function show(q){const r=names.filter(n=>n.name.toLowerCase().includes(q.toLowerCase())).slice(0,40);sug.innerHTML=r.map(n=>`<div data-n="${n.name}">${n.name}<small>${n.n} listings</small></div>`).join('');sug.style.display=r.length?'block':'none';$$('div',sug).forEach(d=>d.onclick=()=>{st.loc=d.dataset.n;inp.value=st.loc;sug.style.display='none';upd()})}
+inp.onfocus=()=>{inp.select();show('')};inp.oninput=()=>show(inp.value);document.addEventListener('click',e=>{if(!e.target.closest('#loc,#sug'))sug.style.display='none'});
+let first=true;
+function upd(){const{loc,bhk,bath,sqft}=st;$$('#bhk button').forEach(b=>b.classList.toggle('on',+b.dataset.v==bhk));$$('#bath button').forEach(b=>b.classList.toggle('on',+b.dataset.v==bath));$('#sqv').textContent=sqft;
+ const p=predict(loc,bhk,sqft,bath),l=L[loc];{const u=p.mid>=100?'Cr':'Lakh',to=p.mid>=100?p.mid/100:p.mid,pv=window._pv||0,t0=performance.now();window._pv=to;(function f(t){const k=Math.min(1,(t-t0)/700),e=1-Math.pow(1-k,3),v=pv+(to-pv)*e;$('#pr').innerHTML=(u=='Cr'?v.toFixed(2):Math.round(v))+'<small>'+u+'</small>';if(k<1)requestAnimationFrame(f)})(t0)}
+ $('#lo').textContent=fmt(p.lo);$('#hi').textContent=fmt(p.hi);const a=Math.max(p.hi*1.15,1),pc=v=>v/a*100;
+ $('#ri').style.left=pc(p.lo)+'%';$('#ri').style.width=pc(p.hi-p.lo)+'%';$('#rm').style.left=`calc(${pc(p.mid)}% - 2px)`;
+ $('#pp').textContent='₹'+Math.round(p.mid*1e5/sqft).toLocaleString();$('#lm').textContent='₹'+l.median_ppsf.toLocaleString()+'/sqft';$('#ln').textContent=l.n;
+ const d=(p.mid*1e5/sqft)/l.median_ppsf-1;$('#vs').textContent=(d>=0?'+':'')+Math.round(d*100)+'%';
+ $('#ol').textContent=`${bhk} BHK · ${sqft} sqft · ${loc}`;scatter($('#sc'),{sqft,price:p.mid});if(!first)$('#pr').classList.remove('pt'),void $('#pr').offsetWidth,$('#pr').classList.add('pt');first=false}
+upd()});
+</script>
+<footer>Trained on the public Kaggle “Bengaluru House Data” set (13,320 listings). Estimates are statistical, not valuations or financial advice. Prices in ₹ lakh (1 Cr = 100 L).</footer>

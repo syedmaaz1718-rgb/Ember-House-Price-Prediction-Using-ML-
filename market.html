@@ -1,0 +1,14 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Market - </title><meta name="description" content="Bengaluru house price predictor trained on 13,000+ real listings."><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body><script src="app.js"></script><main><div class="wrap pg"><div class="eyebrow fade">The market</div><h1 class="serif" style="margin-top:14px"><span class="ln"><span>Bengaluru,</span></span><span class="ln"><span><em>in numbers</em></span></span></h1>
+<section><div class="grid2" style="grid-template-columns:1fr"><div class="card reveal"><div class="eyebrow">Price distribution</div><h2 class="serif" style="font-size:34px;margin-top:8px">Most homes sit under ₹1 Cr</h2><div class="chart rel" id="h"></div></div>
+<div class="card reveal"><div class="eyebrow">Area vs price</div><h2 class="serif" style="font-size:34px;margin-top:8px">Size, priced</h2><div class="chart rel" id="s"></div></div></div></section>
+<section><div class="eyebrow">By locality</div><h2 class="serif" style="margin-top:10px">Price per sq ft</h2>
+<div class="seg" id="sg"><button class="on" data-k="hi">Most expensive 15</button><button data-k="lo">Most affordable 15</button><button data-k="n">Most listings 15</button></div><div class="card reveal rel" id="b"></div></section>
+<section><div class="eyebrow">By size</div><h2 class="serif" style="margin-top:10px">Median price by BHK</h2><div class="card reveal" id="k"></div></section>
+</div></main><script>
+load.then(()=>{reveal();hist($('#h'));scatter($('#s'));const A=STATS.localities_list.filter(l=>l.n>=15);
+const set={hi:[...A].sort((a,b)=>b.median_ppsf-a.median_ppsf).slice(0,15),lo:[...A].sort((a,b)=>a.median_ppsf-b.median_ppsf).slice(0,15),n:A.slice(0,15)};
+const draw=k=>{const el=$('#b');el.classList.add('in');bars(el,set[k].map(l=>({name:l.name,v:l.median_ppsf})),'v',v=>'₹'+v.toLocaleString())};
+$$('#sg button').forEach(b=>b.onclick=()=>{$$('#sg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');draw(b.dataset.k)});draw('hi');
+bars($('#k'),Object.entries(STATS.bhk).map(([b,v])=>({name:b+' BHK ('+v.n+')',v:v.median_price})),'v',v=>fmt(v))});
+</script>
+<footer>Trained on the public Kaggle “Bengaluru House Data” set (13,320 listings). Estimates are statistical, not valuations or financial advice. Prices in ₹ lakh (1 Cr = 100 L).</footer>
